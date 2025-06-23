@@ -7,7 +7,7 @@ init:
     echo '{{prefix}}' > src/ignore_jupyter_cellid.sh
     echo {{ignore_jupyter_cellid_content}} >> src/ignore_jupyter_cellid.sh
     # gitattributes
-    echo "*.ipynb filter=ignore_jupyer_cellid" > .gitattributes
+    echo "*.ipynb filter=igc" > .gitattributes
     # git config
     git config core.attributesfile .gitattributes
     git config filter.igc.clean src/ignore_jupyter_cellid.sh
