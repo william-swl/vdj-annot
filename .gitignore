@@ -1,0 +1,10 @@
+envs/instances/
+.snakemake/
+eg-data/
+__pycache__/
+.ipynb_checkpoints/
+src/temp/
+configs/
+profiles/
+analysis/
+analysis
