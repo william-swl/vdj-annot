@@ -28,7 +28,8 @@ rule all:
         igblast_tsv = expand(Pparse + '/{sample}/igblast_airr.tsv', sample=Lsample),
         changeo = expand(Pparse + '/{sample}/changeo_clone-pass_germ-pass.tsv', sample=Lsample),
         aa_fa = expand(Pparse + '/{sample}/seq_aa.fasta', sample=Lsample),
-        anarci_H = expand(Pparse + '/{sample}/anarci_H.csv', sample=Lsample)
+        anarci_H = expand(Pparse + '/{sample}/anarci_H.csv', sample=Lsample),
+        csv = expand(Pparse + '/{sample}/VDJB.csv', sample=Lsample)
     
     
 rule igblast:
@@ -148,3 +149,27 @@ rule anarci:
             {params.use_species_cmd} --restrict ig -s {params.ext_numbering} --csv --ncpu {resources.cpus} \\
             --assign_germline 1>>{log.o} 2>>{log.e}
     """
+
+rule integrate_parse:
+    input:
+        igblast_tsv = rules.igblast.output.igblast_tsv,
+        igblast_txt = rules.igblast.output.igblast_txt,
+        changeo = rules.changeo.output.changeo,
+        changeo_fail = rules.changeo.output.changeo_fail,
+        anarci_H = rules.anarci.output.anarci_H,
+        anarci_KL = rules.anarci.output.anarci_KL,
+        gm_anarci_H = rules.anarci.output.gm_anarci_H,
+        gm_anarci_KL = rules.anarci.output.gm_anarci_KL,
+        ext_anarci_H = rules.anarci.output.ext_anarci_H,
+        ext_anarci_KL = rules.anarci.output.ext_anarci_KL,
+    output:
+        csv = Pparse + '/{sample}/VDJB.csv',
+        mut = Pparse + '/{sample}/mut.csv'
+    params:
+        ab_schema_region = f'ref/ab_scheme_region.csv',
+    log: notebook = Plog + '/integrate_parse/{sample}.r.ipynb', 
+            e = Plog + '/integrate_parse/{sample}.e', o = Plog + '/integrate_parse/{sample}.o'
+    benchmark: Plog + '/integrate_parse/{sample}.bmk'
+    resources: cpus=config['integrate_parse_cpus']
+    conda: 'envs/env.yaml'
+    notebook: 'src/integrate_parse.r.ipynb'
