@@ -6,4 +6,6 @@
 
 测试集：
 
-- eg3 是 igblast 的`seq_aa`无法被 ANARCI 处理的代表情况。但经 biostrings 翻译后，可修复该问题
+- `eg1` 是常规测试集
+
+- `eg2` 是 igblast 的`seq_aa`无法被 ANARCI 处理的代表情况。但经 biostrings 翻译后，可修复该问题
