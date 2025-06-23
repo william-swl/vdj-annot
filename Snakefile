@@ -27,6 +27,8 @@ rule all:
     input:
         igblast_tsv = expand(Pparse + '/{sample}/igblast_airr.tsv', sample=Lsample),
         changeo = expand(Pparse + '/{sample}/changeo_clone-pass_germ-pass.tsv', sample=Lsample),
+        aa_fa = expand(Pparse + '/{sample}/seq_aa.fasta', sample=Lsample),
+        anarci_H = expand(Pparse + '/{sample}/anarci_H.csv', sample=Lsample)
     
     
 rule igblast:
@@ -98,3 +100,51 @@ rule changeo:
             -r {params.changeo_VB_ref} {params.changeo_DB_ref} {params.changeo_JB_ref} \\
             1>>{log.o} 2>>{log.e}
         """
+
+rule gen_aa:
+    input: igblast_tsv = rules.igblast.output.igblast_tsv
+    output: 
+        aa_fa = Pparse + '/{sample}/seq_aa.fasta',
+        gm_aa_fa = Pparse + '/{sample}/seq_gm_aa.fasta'
+    log: notebook = Plog + '/gen_aa/{sample}.r.ipynb', 
+            e = Plog + '/gen_aa/{sample}.e', o = Plog + '/gen_aa/{sample}.o'
+    benchmark: Plog + '/gen_aa/{sample}.bmk'
+    resources: cpus=1
+    conda: 'envs/env.yaml'
+    notebook: 'src/gen_aa.r.ipynb'
+
+rule anarci:
+    input: 
+        aa_fa = rules.gen_aa.output.aa_fa,
+        gm_aa_fa = rules.gen_aa.output.gm_aa_fa
+    output:
+        anarci_H = Pparse + '/{sample}/anarci_H.csv',
+        anarci_KL = Pparse + '/{sample}/anarci_KL.csv',
+        gm_anarci_H = Pparse + '/{sample}/gm_anarci_H.csv',
+        gm_anarci_KL = Pparse + '/{sample}/gm_anarci_KL.csv',
+        ext_anarci_H = Pparse + '/{sample}/ext_anarci_H.csv',
+        ext_anarci_KL = Pparse + '/{sample}/ext_anarci_KL.csv',
+    log: e = Plog + '/anarci/{sample}.e', o = Plog + '/anarci/{sample}.o'
+    benchmark: Plog + '/anarci/{sample}.bmk'
+    resources: cpus=config['anarci_cpus']
+    params: 
+        outdir = Pparse + '/{sample}', 
+        ext_numbering = config['ext_numbering'],
+        use_species_cmd = f'--use_species {species}' if config['species'] in ['human', 'mouse'] else ''
+    conda: 'envs/env.yaml'
+    shell:"""
+        cd {params.outdir}
+        # for mutation target profile 
+        ANARCI -i {input.aa_fa} -o anarci -ht anarci_hittable.txt \\
+            {params.use_species_cmd} --restrict ig -s imgt --csv --ncpu {resources.cpus} \\
+            --assign_germline 1>>{log.o} 2>>{log.e}
+
+        ANARCI -i {input.gm_aa_fa} -o gm_anarci -ht gm_anarci_hittable.txt \\
+            {params.use_species_cmd} --restrict ig -s imgt --csv --ncpu {resources.cpus} \\
+            --assign_germline 1>>{log.o} 2>>{log.e}
+
+        # for extended numbering
+        ANARCI -i {input.aa_fa} -o ext_anarci -ht ext_anarci_hittable.txt \\
+            {params.use_species_cmd} --restrict ig -s {params.ext_numbering} --csv --ncpu {resources.cpus} \\
+            --assign_germline 1>>{log.o} 2>>{log.e}
+    """
