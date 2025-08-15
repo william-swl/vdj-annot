@@ -1,4 +1,10 @@
-与 cell10x 相比：
+## 简介
+
+从`fasta`格式的核酸序列开始，执行 VDJ gene annotation、CDR detection、SHM count，以获取 B 细胞受体（BCR）的各种信息。使用`igblast, changeo, ANARCI`三个软件互相矫正，获取最终结果
+
+## 特性
+
+与 `cell10x` pipeline 相比：
 
 - 使用 igblast 的`sequence`经过 biostrings 翻译，获取氨基酸序列，然后跑 ANARCI
 
