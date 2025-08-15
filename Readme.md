@@ -2,6 +2,29 @@
 
 从`fasta`格式的核酸序列开始，执行 VDJ gene annotation、CDR detection、SHM count，以获取 B 细胞受体（BCR）的各种信息。使用`igblast, changeo, ANARCI`三个软件互相矫正，获取最终结果
 
+## 示例数据
+
+### 准备
+
+首先为系统安装 conda，推荐使用 [mamba](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) 发行版
+
+使用[chsrc](https://github.com/RubyMetric/chsrc)，将 conda 源切换到最合适的镜像站，尽量避免环境安装失败
+
+重新连接终端后，安装 Snakemake 基础 conda 环境
+
+```
+mamba create -n vdj && mamba activate vdj
+mamba install snakemake=8.24.0 just=1.42.4 -y
+```
+
+### 开始运行
+
+```
+snakemake --profile profiles/local --configfile configs/eg.yaml -j1
+```
+
+该命令将自动完成所需匿名 conda 环境的安装，并运行示例数据
+
 ## 特性
 
 与 `cell10x` pipeline 相比：
