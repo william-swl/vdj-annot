@@ -27,6 +27,10 @@ snakemake --profile profiles/local --configfile configs/eg.yaml -j1
 
 ## 特性
 
+使用`igblast`运行结果，判断序列为轻链或重链
+
+使用`configfile`中`cell_pattern`，正则匹配提取轻重链序列对应的细胞。默认`'^(.+?)-[HLK]$'`，例如`.fasta`文件中，`>cell1-H`和`>cell1-L`被认定为 cell1，`>cell9-H`和`>cell9-K`被认定为 cell9
+
 与 `cell10x` pipeline 相比：
 
 - 使用 igblast 的`sequence`经过 biostrings 翻译，获取氨基酸序列，然后跑 ANARCI
